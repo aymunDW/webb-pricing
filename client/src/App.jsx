@@ -72,7 +72,10 @@ export default function App() {
         </div>
         {goldPrice && (
           <div className="dw-gold-ticker">
-            Gold Spot (24k/oz)<br /><b>{money(goldPrice.pricePerOz)}</b>
+            Gold Spot (24k)<br />
+            <b>{money(goldPrice.pricePerOz)}</b> / oz<br />
+            <b>{money(goldPrice.pricePerOz / 20)}</b> / dwt
+            <div style={{ marginTop: 6, fontSize: 10, color: '#9aa4bd', fontFamily: "'Inter',sans-serif", letterSpacing: 0 }}>1 troy oz = 20 dwt</div>
           </div>
         )}
         <div className="dw-side-foot">
@@ -232,7 +235,7 @@ function StyleDetail({ styleId, onBack, onEdit, onChanged }) {
       {tab === 'cost' && (
         <div className="dw-panel">
           <div className="dw-panel-title">Cost Breakdown (live gold price)</div>
-          <div className="dw-cost-row"><span>Gold ({gToDwt(style.gold_weight_g).toFixed(2)} dwt @ {style.gold_karat}k, {money(costBreakdown.goldPricePerGram * DWT_TO_GRAMS)}/dwt)</span><span>{money(costBreakdown.goldCost)}</span></div>
+          <div className="dw-cost-row"><span>Gold ({gToDwt(style.gold_weight_g).toFixed(2)} dwt / {(gToDwt(style.gold_weight_g)/20).toFixed(4)} oz @ {style.gold_karat}k, {money(costBreakdown.goldPricePerGram * DWT_TO_GRAMS)}/dwt)</span><span>{money(costBreakdown.goldCost)}</span></div>
           <div className="dw-cost-row"><span>Stone Cost</span><span>{money(costBreakdown.stoneCost)}</span></div>
           <div className="dw-cost-row"><span>Labor Cost</span><span>{money(costBreakdown.laborCost)}</span></div>
           <div className="dw-cost-row"><span>Total Cost</span><span>{money(costBreakdown.totalCost)}</span></div>
@@ -356,7 +359,13 @@ function StyleModal({ editing, onClose, onSave }) {
           <select value={form.category} onChange={e => set('category', e.target.value)}>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select>
         </div>
         <div className="dw-cost-grid">
-          <div className="dw-field"><label>Gold Weight (dwt)</label><input type="number" step="0.001" value={form.goldWeightDwt} onChange={e => set('goldWeightDwt', e.target.value)} /></div>
+          <div className="dw-field">
+            <label>Gold Weight (dwt)</label>
+            <input type="number" step="0.001" value={form.goldWeightDwt} onChange={e => set('goldWeightDwt', e.target.value)} />
+            <div style={{ fontSize: 11, color: 'var(--ink-soft)', marginTop: 4 }}>
+              1 troy oz = 20 dwt{form.goldWeightDwt ? ` · ${(Number(form.goldWeightDwt) / 20).toFixed(4)} oz` : ''}
+            </div>
+          </div>
           <div className="dw-field"><label>Gold Karat</label>
             <select value={form.goldKarat} onChange={e => set('goldKarat', e.target.value)}>{KARATS.map(k => <option key={k} value={k}>{k}k</option>)}</select>
           </div>
