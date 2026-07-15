@@ -3,7 +3,7 @@ import AuthPage from './pages/AuthPage.jsx';
 import { api, getStoredToken, setToken } from './api.js';
 
 const CATEGORIES = ["Rings","Bracelets","Necklaces","Earrings","Brooches","Cufflinks","Other"];
-const KARATS = [24, 22, 18, 14, 10];
+const KARATS = [18, 24, 22, 14, 10];
 const DWT_TO_GRAMS = 1.55517384;
 const gToDwt = (g) => Number(g || 0) / DWT_TO_GRAMS;
 const dwtToG = (dwt) => Number(dwt || 0) * DWT_TO_GRAMS;
@@ -72,9 +72,9 @@ export default function App() {
         </div>
         {goldPrice && (
           <div className="dw-gold-ticker">
-            Gold Spot (24k)<br />
-            <b>{money(goldPrice.pricePerOz)}</b> / oz<br />
-            <b>{money(goldPrice.pricePerOz / 20)}</b> / dwt
+            Gold Price (18k)<br />
+            <b>{money(goldPrice.perGramByKarat[18] * 31.1035)}</b> / oz<br />
+            <b>{money(goldPrice.perGramByKarat[18] * DWT_TO_GRAMS)}</b> / dwt
             <div style={{ marginTop: 6, fontSize: 10, color: '#9aa4bd', fontFamily: "'Inter',sans-serif", letterSpacing: 0 }}>1 troy oz = 20 dwt</div>
           </div>
         )}
@@ -367,7 +367,7 @@ function StyleModal({ editing, onClose, onSave }) {
             </div>
           </div>
           <div className="dw-field"><label>Gold Karat</label>
-            <select value={form.goldKarat} onChange={e => set('goldKarat', e.target.value)}>{KARATS.map(k => <option key={k} value={k}>{k}k</option>)}</select>
+            <select value={form.goldKarat} onChange={e => set('goldKarat', e.target.value)}>{KARATS.map(k => <option key={k} value={k}>{k}k{k === 18 ? ' (Primary)' : ''}</option>)}</select>
           </div>
         </div>
         <div className="dw-cost-grid">
