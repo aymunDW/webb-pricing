@@ -4,6 +4,9 @@ import { api, getStoredToken, setToken } from './api.js';
 
 const CATEGORIES = ["Rings","Bracelets","Necklaces","Earrings","Brooches","Cufflinks","Other"];
 const KARATS = [24, 22, 18, 14, 10];
+const DWT_TO_GRAMS = 1.55517384;
+const gToDwt = (g) => Number(g || 0) / DWT_TO_GRAMS;
+const dwtToG = (dwt) => Number(dwt || 0) * DWT_TO_GRAMS;
 
 function money(n) {
   return Number(n || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
@@ -176,7 +179,7 @@ function Styles({ styles, search, setSearch, onAdd, onOpen, onDelete }) {
                 <td style={{ cursor: 'pointer' }} onClick={() => onOpen(s.id)}><b>{s.style_number}</b></td>
                 <td style={{ cursor: 'pointer' }} onClick={() => onOpen(s.id)}>{s.description}</td>
                 <td><span className="dw-tag">{s.category}</span></td>
-                <td>{s.gold_weight_g}g / {s.gold_karat}k</td>
+                <td>{gToDwt(s.gold_weight_g).toFixed(2)} dwt / {s.gold_karat}k</td>
                 <td>{s.current_price ? money(s.current_price) : '—'}</td>
                 <td>{s.total_units_sold}</td>
                 <td>{money(s.total_revenue)}</td>
@@ -229,7 +232,7 @@ function StyleDetail({ styleId, onBack, onEdit, onChanged }) {
       {tab === 'cost' && (
         <div className="dw-panel">
           <div className="dw-panel-title">Cost Breakdown (live gold price)</div>
-          <div className="dw-cost-row"><span>Gold ({style.gold_weight_g}g @ {style.gold_karat}k, {money(costBreakdown.goldPricePerGram)}/g)</span><span>{money(costBreakdown.goldCost)}</span></div>
+          <div className="dw-cost-row"><span>Gold ({gToDwt(style.gold_weight_g).toFixed(2)} dwt @ {style.gold_karat}k, {money(costBreakdown.goldPricePerGram * DWT_TO_GRAMS)}/dwt)</span><span>{money(costBreakdown.goldCost)}</span></div>
           <div className="dw-cost-row"><span>Stone Cost</span><span>{money(costBreakdown.stoneCost)}</span></div>
           <div className="dw-cost-row"><span>Labor Cost</span><span>{money(costBreakdown.laborCost)}</span></div>
           <div className="dw-cost-row"><span>Total Cost</span><span>{money(costBreakdown.totalCost)}</span></div>
@@ -337,10 +340,10 @@ function StyleDetail({ styleId, onBack, onEdit, onChanged }) {
 function StyleModal({ editing, onClose, onSave }) {
   const [form, setForm] = useState(editing ? {
     styleNumber: editing.style_number, description: editing.description || '', category: editing.category || CATEGORIES[0],
-    goldWeightG: editing.gold_weight_g || 0, goldKarat: editing.gold_karat || 18,
+    goldWeightDwt: gToDwt(editing.gold_weight_g).toFixed(3), goldKarat: editing.gold_karat || 18,
     stoneCost: editing.stone_cost || 0, laborCost: editing.labor_cost || 0,
     targetMarginPct: editing.target_margin_pct || 100, notes: editing.notes || ''
-  } : { styleNumber: '', description: '', category: CATEGORIES[0], goldWeightG: 0, goldKarat: 18, stoneCost: 0, laborCost: 0, targetMarginPct: 100, notes: '' });
+  } : { styleNumber: '', description: '', category: CATEGORIES[0], goldWeightDwt: 0, goldKarat: 18, stoneCost: 0, laborCost: 0, targetMarginPct: 100, notes: '' });
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
 
   return (
@@ -353,7 +356,7 @@ function StyleModal({ editing, onClose, onSave }) {
           <select value={form.category} onChange={e => set('category', e.target.value)}>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select>
         </div>
         <div className="dw-cost-grid">
-          <div className="dw-field"><label>Gold Weight (g)</label><input type="number" step="0.01" value={form.goldWeightG} onChange={e => set('goldWeightG', e.target.value)} /></div>
+          <div className="dw-field"><label>Gold Weight (dwt)</label><input type="number" step="0.001" value={form.goldWeightDwt} onChange={e => set('goldWeightDwt', e.target.value)} /></div>
           <div className="dw-field"><label>Gold Karat</label>
             <select value={form.goldKarat} onChange={e => set('goldKarat', e.target.value)}>{KARATS.map(k => <option key={k} value={k}>{k}k</option>)}</select>
           </div>
@@ -366,7 +369,11 @@ function StyleModal({ editing, onClose, onSave }) {
         <div className="dw-field"><label>Notes</label><textarea value={form.notes} onChange={e => set('notes', e.target.value)} /></div>
         <div className="dw-modal-actions">
           <button className="dw-btn dw-btn-ghost" onClick={onClose}>Cancel</button>
-          <button className="dw-btn dw-btn-gold" onClick={() => { if (!form.styleNumber.trim()) return alert('Style number is required'); onSave(form); }}>
+          <button className="dw-btn dw-btn-gold" onClick={() => {
+            if (!form.styleNumber.trim()) return alert('Style number is required');
+            const { goldWeightDwt, ...rest } = form;
+            onSave({ ...rest, goldWeightG: dwtToG(goldWeightDwt) });
+          }}>
             {editing ? 'Save Changes' : 'Add Style'}
           </button>
         </div>
