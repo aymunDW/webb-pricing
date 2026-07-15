@@ -138,7 +138,7 @@ function Dashboard({ styles, goldPrice, onOpenStyle }) {
         <div className="dw-stat"><div className="dw-stat-num">{styles.length}</div><div className="dw-stat-label">Styles Tracked</div></div>
         <div className="dw-stat"><div className="dw-stat-num">{totalUnits}</div><div className="dw-stat-label">Units Sold</div></div>
         <div className="dw-stat"><div className="dw-stat-num">{money(totalRevenue)}</div><div className="dw-stat-label">Total Revenue</div></div>
-        <div className="dw-stat"><div className="dw-stat-num">{goldPrice ? money(goldPrice.pricePerOz) : '—'}</div><div className="dw-stat-label">Gold / oz (24k)</div></div>
+        <div className="dw-stat"><div className="dw-stat-num">{goldPrice ? money(goldPrice.perGramByKarat[18] * DWT_TO_GRAMS) : '—'}</div><div className="dw-stat-label">Gold / dwt (18k)</div></div>
       </div>
       <div className="dw-panel">
         <div className="dw-panel-title">Recent Styles</div>
